@@ -50,7 +50,7 @@ jobs:
               uses: awalsh128/cache-apt-pkgs-action@latest
               if: matrix.os == 'ubuntu-22.04'
               with:
-                packages: gcc-13 g++-13 freeglut3-dev libfreetype*-dev libxinerama-dev libxcursor-dev libasound2-dev libxrandr-dev libcurl4-openssl-dev
+                packages: gcc-13 g++-13 patchelf freeglut3-dev libfreetype*-dev libxinerama-dev libxcursor-dev libasound2-dev libxrandr-dev libcurl4-openssl-dev
                 version: 1
 
             - name: Checkout code
