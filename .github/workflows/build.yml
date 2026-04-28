@@ -1,6 +1,7 @@
 name: Build XDAQ-Neuropixels plugin
 
 on:
+    push:
     workflow_dispatch:
     workflow_call:
 
@@ -54,11 +55,11 @@ jobs:
                 version: 1
 
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: conan cache
               id: conan_cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: ~/.conan2
                   key: conan-${{ matrix.os }}-${{ matrix.arch }}
@@ -82,7 +83,7 @@ jobs:
             - name: open-ephys.lib cache
               if: matrix.os == 'windows-2022'
               id: open-ephys_lib_cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: plugin-GUI/Build/Release/open-ephys.lib
                   key: open-ephys-lib-${{ matrix.os }}-${{ matrix.arch }}-${{ steps.plugin_gui_hash.outputs.commit }}
