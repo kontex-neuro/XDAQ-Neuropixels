@@ -10,7 +10,7 @@ endif()
 get_filename_component(GUI_BASE_DIR ${GUI_BASE_DIR} ABSOLUTE)
 
 set(PLUGIN_NAME XDAQ-Neuropixels)
-project(${PLUGIN_NAME} VERSION 0.3.3 LANGUAGES CXX)
+project(${PLUGIN_NAME} VERSION 0.4.0 LANGUAGES CXX)
 
 set(GUI_COMMONLIB_DIR ${GUI_BASE_DIR}/installed_libs)
 
@@ -47,7 +47,6 @@ target_include_directories(${PLUGIN_NAME} PUBLIC ${GUI_BASE_DIR}/JuceLibraryCode
 #Libraries and compiler options
 find_package(fmt REQUIRED)
 find_package(libxdaqnp REQUIRED)
-find_package(xdaq REQUIRED)
 target_link_libraries(${PLUGIN_NAME} PRIVATE
 	fmt::fmt
 	xdaq::xdaq_npapi
