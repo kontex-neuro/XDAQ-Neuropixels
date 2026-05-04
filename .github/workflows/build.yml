@@ -30,7 +30,7 @@ jobs:
               run: pipx install conan ninja
 
             - name: Setup Compiler (Windows)
-              uses: ilammy/msvc-dev-cmd@v1
+              uses: ilammy/msvc-dev-cmd@138b1c783b65ec697d8342918306b7b2db4e88f1
               if: matrix.os == 'windows-2022'
 
             - name: Setup Compiler (MacOS)
@@ -105,7 +105,7 @@ jobs:
                   7z a ${{ matrix.base_name }}.zip ./install/*
 
             - name: Upload artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: ${{ matrix.base_name }}
                   path: ${{ matrix.base_name }}.zip

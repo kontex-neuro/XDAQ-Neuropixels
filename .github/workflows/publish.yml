@@ -18,7 +18,7 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Download all artifacts
-              uses: actions/download-artifact@v4
+              uses: actions/download-artifact@v8
               with:
                   path: dist
 
@@ -105,7 +105,7 @@ jobs:
                   spctl -a -vvv dist/mac-universal-verify/plugins/XDAQ-Neuropixels.bundle
 
             - name: Upload merged macOS bundle
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: mac-universal
                   path: dist/mac-universal.zip
@@ -116,7 +116,7 @@ jobs:
 
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Extract API Version
               run: |
@@ -127,7 +127,7 @@ jobs:
                     sed -E 's/^#define[[:space:]]+PLUGIN_API_VER[[:space:]]+([0-9]+)/\1/') >> $GITHUB_ENV
 
             - name: Download all artifacts
-              uses: actions/download-artifact@v4
+              uses: actions/download-artifact@v8
               with:
                   path: dist
 
@@ -193,7 +193,7 @@ jobs:
                     "https://openephys.jfrog.io/artifactory/XDAQ-Neuropixels-plugin/linux/$linux_new_name"
 
             - name: Upload dist folder
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: dist
                   path: dist
