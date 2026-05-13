@@ -419,6 +419,8 @@ void XDAQ_BS::close()
         errorCode = Neuropixels::closeProbe (slot, probe->headstage->port, probe->dock);
     }
 
+    probes.clear();
+
     errorCode = Neuropixels::closeBS (slot);
     probesInitialized = false;
     LOGD ("Closed basestation on slot: ", slot, " w/ error code: ", errorCode);
