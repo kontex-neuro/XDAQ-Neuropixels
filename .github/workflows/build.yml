@@ -2,6 +2,8 @@ name: Build XDAQ-Neuropixels plugin
 
 on:
     push:
+      branches-ignore:
+        - main
     workflow_dispatch:
     workflow_call:
 
