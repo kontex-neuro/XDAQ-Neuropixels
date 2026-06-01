@@ -111,7 +111,7 @@ jobs:
               if: matrix.os != 'windows-2022'
               shell: bash
               run: |
-                  cd install && zip -D -X -r ../${{ matrix.base_name }}.zip ./*
+                  7z a ${{ matrix.base_name }}.zip ./install/*
 
             - name: Upload artifact
               uses: actions/upload-artifact@v7
