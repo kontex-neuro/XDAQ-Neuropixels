@@ -101,7 +101,14 @@ jobs:
                   cmake -S . -B build/Release --preset conan-release -DCMAKE_INSTALL_PREFIX=install -DGUI_BASE_DIR=plugin-GUI
                   cmake --build build/Release --preset conan-release --target install
 
-            - name: zip
+            - name: zip (Windows)
+              if: matrix.os == 'windows-2022'
+              shell: pwsh
+              run: |
+                  Compress-Archive -Path install/* -DestinationPath ${{ matrix.base_name }}.zip
+
+            - name: zip (macOS/Linux)
+              if: matrix.os != 'windows-2022'
               shell: bash
               run: |
                   cd install && zip -D -X -r ../${{ matrix.base_name }}.zip ./*
