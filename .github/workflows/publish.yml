@@ -161,12 +161,9 @@ jobs:
 
                   # FIXME: remove hack
                   # repack windows zip so the plugins/XDAQ-Neuropixels.dll  is the first entry instead of plugins/
-                  7za x dist/$win_new_name -odist/windows-repack
+                  unzip -q dist/$win_new_name -d dist/windows-repack
                   rm dist/$win_new_name
-                  cd dist/windows-repack
-                  7za a ../$win_new_name plugins/XDAQ-Neuropixels.dll
-                  7za a ../$win_new_name shared/XDAQ-Neuropixels
-                  cd ../..
+                  zip -r -j dist/windows-repack dist/$win_new_name
                   # if [[ -z dist/mac-universal ]]; then
                   #       echo "Missing dist/mac-universal"
                   #       exit 1
