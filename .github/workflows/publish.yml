@@ -164,7 +164,7 @@ jobs:
                   unzip -q dist/$win_new_name -d dist/windows-repack
                   rm dist/$win_new_name
                   cd dist/windows-repack
-                  zip -r ../../$win_new_name .
+                  zip -r ../$win_new_name .
                   cd ../..
                   zipinfo "dist/$win_new_name"
                   # if [[ -z dist/mac-universal ]]; then
