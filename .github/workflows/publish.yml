@@ -167,13 +167,13 @@ jobs:
                   7za a ../$win_new_name plugins/XDAQ-Neuropixels.dll
                   7za a ../$win_new_name shared/XDAQ-Neuropixels
                   cd ../..
-                  if [[ -z dist/mac-universal ]]; then
-                        echo "Missing dist/mac-universal"
-                        exit 1
-                  fi
-                  mac_new_name="XDAQ-Neuropixels-mac_${upload_tag}-API${api_ver}.zip"
-                  mv dist/mac-universal.zip dist/$mac_new_name
-                  echo "Created: dist/$mac_new_name"
+                  # if [[ -z dist/mac-universal ]]; then
+                  #       echo "Missing dist/mac-universal"
+                  #       exit 1
+                  # fi
+                  # mac_new_name="XDAQ-Neuropixels-mac_${upload_tag}-API${api_ver}.zip"
+                  # mv dist/mac-universal.zip dist/$mac_new_name
+                  # echo "Created: dist/$mac_new_name"
 
                   if [[ -z dist/linux-x86_64 ]]; then
                           echo "Missing dist/linux-x86_64"
