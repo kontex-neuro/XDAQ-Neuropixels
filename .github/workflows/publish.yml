@@ -163,7 +163,7 @@ jobs:
                   # repack windows zip so the plugins/XDAQ-Neuropixels.dll  is the first entry instead of plugins/
                   unzip -q dist/$win_new_name -d dist/windows-repack
                   rm dist/$win_new_name
-                  zip -r -j dist/$win_new_name dist/windows-repack 
+                  zip -r dist/$win_new_name dist/windows-repack 
                   # if [[ -z dist/mac-universal ]]; then
                   #       echo "Missing dist/mac-universal"
                   #       exit 1
