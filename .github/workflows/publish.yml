@@ -39,18 +39,18 @@ jobs:
                       dist/mac-x86_64/plugins/XDAQ-Neuropixels.bundle \
                       dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
 
-            - name: Sign and Notarize macOS universal bundle
-              env:
-                  MACOS_CERTIFICATE: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-                  MACOS_CERTIFICATE_PWD: ${{ secrets.BUILD_CERTIFICATE_PWD }}
-                  MACOS_CERTIFICATE_NAME: ${{ secrets.BUILD_CERTIFICATE_NAME }}
-                  MACOS_CI_KEYCHAIN_PWD: ${{ secrets.PROD_MACOS_CI_KEYCHAIN_PWD }}
-                  PROD_MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
-                  PROD_MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
-                  PROD_MACOS_NOTARIZATION_PWD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
-              run: |
-                  set -e
-
+#            - name: Sign and Notarize macOS universal bundle
+#              env:
+#                  MACOS_CERTIFICATE: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+#                  MACOS_CERTIFICATE_PWD: ${{ secrets.BUILD_CERTIFICATE_PWD }}
+#                  MACOS_CERTIFICATE_NAME: ${{ secrets.BUILD_CERTIFICATE_NAME }}
+#                  MACOS_CI_KEYCHAIN_PWD: ${{ secrets.PROD_MACOS_CI_KEYCHAIN_PWD }}
+#                  PROD_MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
+#                  PROD_MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
+#                  PROD_MACOS_NOTARIZATION_PWD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
+#              run: |
+#                  set -e
+#
 #                  echo "Creating keychain"
 #                  security create-keychain -p $MACOS_CI_KEYCHAIN_PWD build.keychain
 #                  security default-keychain -s build.keychain
@@ -91,18 +91,18 @@ jobs:
 #                  echo "Checking signed bundle"
 #                  codesign --verify --verbose=2 \
 #                    dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
-
-                  spctl -a -vvv dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
-
-                  ditto -c -k --keepParent --rsrc --extattr dist/mac-universal/plugins dist/mac-universal.zip
-
-                  echo "Unzipping the final archive to another folder for verification"
-                  ditto -x -k dist/mac-universal.zip dist/mac-universal-verify
-
-                  codesign --verify --verbose=2 \
-                    dist/mac-universal-verify/plugins/XDAQ-Neuropixels.bundle
-
-                  spctl -a -vvv dist/mac-universal-verify/plugins/XDAQ-Neuropixels.bundle
+#
+#                  spctl -a -vvv dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
+#
+#                  ditto -c -k --keepParent --rsrc --extattr dist/mac-universal/plugins dist/mac-universal.zip
+#
+#                  echo "Unzipping the final archive to another folder for verification"
+#                  ditto -x -k dist/mac-universal.zip dist/mac-universal-verify
+#
+#                  codesign --verify --verbose=2 \
+#                    dist/mac-universal-verify/plugins/XDAQ-Neuropixels.bundle
+#
+#                  spctl -a -vvv dist/mac-universal-verify/plugins/XDAQ-Neuropixels.bundle
 
             - name: Upload merged macOS bundle
               uses: actions/upload-artifact@v7
