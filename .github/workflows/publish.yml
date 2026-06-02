@@ -39,70 +39,70 @@ jobs:
                       dist/mac-x86_64/plugins/XDAQ-Neuropixels.bundle \
                       dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
 
-#            - name: Sign and Notarize macOS universal bundle
-#              env:
-#                  MACOS_CERTIFICATE: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-#                  MACOS_CERTIFICATE_PWD: ${{ secrets.BUILD_CERTIFICATE_PWD }}
-#                  MACOS_CERTIFICATE_NAME: ${{ secrets.BUILD_CERTIFICATE_NAME }}
-#                  MACOS_CI_KEYCHAIN_PWD: ${{ secrets.PROD_MACOS_CI_KEYCHAIN_PWD }}
-#                  PROD_MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
-#                  PROD_MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
-#                  PROD_MACOS_NOTARIZATION_PWD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
-#              run: |
-#                  set -e
-#
-#                  echo "Creating keychain"
-#                  security create-keychain -p $MACOS_CI_KEYCHAIN_PWD build.keychain
-#                  security default-keychain -s build.keychain
-#                  echo "Unlocking keychain"
-#                  security unlock-keychain -p $MACOS_CI_KEYCHAIN_PWD build.keychain
-#
-#                  echo "Importing certificate"
-#                  echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
-#                  security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
-#                  security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_CI_KEYCHAIN_PWD build.keychain
-#
-#                  echo "Signing the bundle"
-#                  codesign --deep --force --strict --verbose --timestamp \
-#                    --sign "$MACOS_CERTIFICATE_NAME" dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
-#                  echo "Verifying the signed bundle"
-#                  codesign --verify --verbose=2 dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
-#
-#                  echo "Creating notarization profile"
-#                  xcrun notarytool store-credentials "notarytool-profile" \
-#                    --apple-id "$PROD_MACOS_NOTARIZATION_APPLE_ID" \
-#                    --team-id "$PROD_MACOS_NOTARIZATION_TEAM_ID" \
-#                    --password "$PROD_MACOS_NOTARIZATION_PWD"
-#
-#                  echo "Submitting for notarization"                  
-#                  ditto -c -k --keepParent \
-#                    dist/mac-universal/plugins/XDAQ-Neuropixels.bundle \
-#                    dist/mac-universal/XDAQ-Neuropixels.bundle.zip
-#                  xcrun notarytool submit dist/mac-universal/XDAQ-Neuropixels.bundle.zip \
-#                    --keychain-profile "notarytool-profile" --wait
-#
-#                  echo "Checking signed bundle"
-#                  codesign --verify --verbose=2 \
-#                    dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
-#
-#                  echo "Stapling the bundle"
-#                  xcrun stapler staple dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
-#
-#                  echo "Checking signed bundle"
-#                  codesign --verify --verbose=2 \
-#                    dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
-#
-#                  spctl -a -vvv dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
-#
-#                  ditto -c -k --keepParent --rsrc --extattr dist/mac-universal/plugins dist/mac-universal.zip
-#
-#                  echo "Unzipping the final archive to another folder for verification"
-#                  ditto -x -k dist/mac-universal.zip dist/mac-universal-verify
-#
-#                  codesign --verify --verbose=2 \
-#                    dist/mac-universal-verify/plugins/XDAQ-Neuropixels.bundle
-#
-#                  spctl -a -vvv dist/mac-universal-verify/plugins/XDAQ-Neuropixels.bundle
+            #- name: Sign and Notarize macOS universal bundle
+            #  env:
+            #      MACOS_CERTIFICATE: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+            #      MACOS_CERTIFICATE_PWD: ${{ secrets.BUILD_CERTIFICATE_PWD }}
+            #      MACOS_CERTIFICATE_NAME: ${{ secrets.BUILD_CERTIFICATE_NAME }}
+            #      MACOS_CI_KEYCHAIN_PWD: ${{ secrets.PROD_MACOS_CI_KEYCHAIN_PWD }}
+            #      PROD_MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
+            #      PROD_MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
+            #      PROD_MACOS_NOTARIZATION_PWD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
+            #  run: |
+            #      set -e
+
+            #      echo "Creating keychain"
+            #      security create-keychain -p $MACOS_CI_KEYCHAIN_PWD build.keychain
+            #      security default-keychain -s build.keychain
+            #      echo "Unlocking keychain"
+            #      security unlock-keychain -p $MACOS_CI_KEYCHAIN_PWD build.keychain
+
+            #      echo "Importing certificate"
+            #      echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+            #      security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+            #      security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $MACOS_CI_KEYCHAIN_PWD build.keychain
+
+            #      echo "Signing the bundle"
+            #      codesign --deep --force --strict --verbose --timestamp \
+            #        --sign "$MACOS_CERTIFICATE_NAME" dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
+            #      echo "Verifying the signed bundle"
+            #      codesign --verify --verbose=2 dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
+
+            #      echo "Creating notarization profile"
+            #      xcrun notarytool store-credentials "notarytool-profile" \
+            #        --apple-id "$PROD_MACOS_NOTARIZATION_APPLE_ID" \
+            #        --team-id "$PROD_MACOS_NOTARIZATION_TEAM_ID" \
+            #        --password "$PROD_MACOS_NOTARIZATION_PWD"
+
+            #      echo "Submitting for notarization"                  
+            #      ditto -c -k --keepParent \
+            #        dist/mac-universal/plugins/XDAQ-Neuropixels.bundle \
+            #        dist/mac-universal/XDAQ-Neuropixels.bundle.zip
+            #      xcrun notarytool submit dist/mac-universal/XDAQ-Neuropixels.bundle.zip \
+            #        --keychain-profile "notarytool-profile" --wait
+
+            #      echo "Checking signed bundle"
+            #      codesign --verify --verbose=2 \
+            #        dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
+
+            #      echo "Stapling the bundle"
+            #      xcrun stapler staple dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
+
+            #      echo "Checking signed bundle"
+            #      codesign --verify --verbose=2 \
+            #        dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
+
+            #      spctl -a -vvv dist/mac-universal/plugins/XDAQ-Neuropixels.bundle
+
+            #      ditto -c -k --keepParent --rsrc --extattr dist/mac-universal/plugins dist/mac-universal.zip
+
+            #      echo "Unzipping the final archive to another folder for verification"
+            #      ditto -x -k dist/mac-universal.zip dist/mac-universal-verify
+
+            #      codesign --verify --verbose=2 \
+            #        dist/mac-universal-verify/plugins/XDAQ-Neuropixels.bundle
+
+            #      spctl -a -vvv dist/mac-universal-verify/plugins/XDAQ-Neuropixels.bundle
 
             - name: Upload merged macOS bundle
               uses: actions/upload-artifact@v7
@@ -160,15 +160,13 @@ jobs:
                   echo "Created: dist/$win_new_name"
 
                   # FIXME: remove hack
-                  # repack windows zip so the plugins/XDAQ-Neuropixels.dll dll is the first entry instead of plugins/
+                  # repack windows zip so the plugins/XDAQ-Neuropixels.dll  is the first entry instead of plugins/
                   7za x dist/$win_new_name -odist/windows-repack
                   rm dist/$win_new_name
                   cd dist/windows-repack
                   7za a ../$win_new_name plugins/XDAQ-Neuropixels.dll
                   7za a ../$win_new_name shared/XDAQ-Neuropixels
                   cd ../..
-
-
                   if [[ -z dist/mac-universal ]]; then
                         echo "Missing dist/mac-universal"
                         exit 1
