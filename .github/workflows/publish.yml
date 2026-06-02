@@ -160,12 +160,12 @@ jobs:
                   echo "Created: dist/$win_new_name"
 
                   # FIXME: remove hack
-                  # repack windows zip so the plugins/XDAQ-OE.dll dll is the first entry instead of plugins/
+                  # repack windows zip so the plugins/XDAQ-Neuropixels.dll dll is the first entry instead of plugins/
                   7za x dist/$win_new_name -odist/windows-repack
                   rm dist/$win_new_name
                   cd dist/windows-repack
-                  7za a ../$win_new_name plugins/XDAQ-OE.dll
-                  7za a ../$win_new_name shared/XDAQ-OE
+                  7za a ../$win_new_name plugins/XDAQ-Neuropixels.dll
+                  7za a ../$win_new_name shared/XDAQ-Neuropixels
                   cd ../..
 
 
