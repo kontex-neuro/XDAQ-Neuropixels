@@ -188,9 +188,7 @@ jobs:
                       echo "Not a release tag: $ref, skipping upload"
                       exit 0
                   fi
-
-                  6ae3433b40852f9e259ff2874c46c1e0e9fd0026
-
+                  
                   if [[ -z "${{ secrets.ARTIFACTORY_ACCESS_TOKEN  }}" ]]; then
                       echo "No Artifactory API key set, skipping upload"
                       exit 0
