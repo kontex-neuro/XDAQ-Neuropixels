@@ -159,6 +159,15 @@ jobs:
                   mv dist/windows-x86_64.zip dist/$win_new_name
                   echo "Created: dist/$win_new_name"
 
+                  # FIXME: remove hack
+                  # repack windows zip so the plugins/XDAQ-Neuropixels.dll  is the first entry instead of plugins/
+                  unzip -q dist/$win_new_name -d dist/windows-repack
+                  rm dist/$win_new_name
+                  cd dist/windows-repack
+                  zip -r -D ../$win_new_name .
+                  cd ../..
+                  rm -rf dist/windows-repack
+                  zipinfo "dist/$win_new_name"
                   if [[ -z dist/mac-universal ]]; then
                         echo "Missing dist/mac-universal"
                         exit 1
@@ -179,7 +188,7 @@ jobs:
                       echo "Not a release tag: $ref, skipping upload"
                       exit 0
                   fi
-
+                  
                   if [[ -z "${{ secrets.ARTIFACTORY_ACCESS_TOKEN  }}" ]]; then
                       echo "No Artifactory API key set, skipping upload"
                       exit 0
