@@ -401,6 +401,7 @@ void Neuropixels1::stopAcquisition()
 void Neuropixels1::run()
 {
     double timestamp_s[MAXPACKETS];
+    double ap_timestamp_s[12 * MAXPACKETS];
     uint64_t last_npx_timestamp = 0;
     while (! threadShouldExit())
     {
@@ -446,6 +447,8 @@ void Neuropixels1::run()
 
                     last_npx_timestamp = npx_timestamp;
 
+                    ap_timestamp_s[i + packetNum * 12] = npx_timestamp / 1e6;
+
                     for (int j = 0; j < 384; j++)
                     {
                         apSamples[j * (12 * count) + i + (packetNum * 12)] =
@@ -481,7 +484,7 @@ void Neuropixels1::run()
                     lfpSamples[(384 * count) + packetNum] = (float) eventCode;
             }
 
-            apBuffer->addToBuffer (apSamples, ap_timestamps, timestamp_s, event_codes, 12 * count);
+            apBuffer->addToBuffer (apSamples, ap_timestamps, ap_timestamp_s, event_codes, 12 * count);
             apView->addToBuffer (apSamples, 12 * count);
             lfpBuffer->addToBuffer (lfpSamples, lfp_timestamps, timestamp_s, lfp_event_codes, count);
             lfpView->addToBuffer (lfpSamples, count);
