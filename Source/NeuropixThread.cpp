@@ -33,6 +33,7 @@
 
 #include "UI/NeuropixInterface.h"
 
+#include <filesystem>
 
 //Helpful for debugging when PXI system is connected but don't want to connect to real probes
 #define FORCE_SIMULATION_MODE false
@@ -54,7 +55,22 @@ std::unique_ptr<GenericEditor> NeuropixThread::createEditor (SourceNode* sn)
 void Initializer::run()
 {
     setProgress (-1); // endless moving progress bar
+#if defined(OS_MACOS)
+    // use default search path on Mac, which is a relative path inside the app bundle
     Neuropixels::scanBS();
+#else
+    namespace fs = std::filesystem;
+    auto sharedDir =
+        fs::path(CoreServices::getSavedStateDirectory().getFullPathName().toStdString());
+    if (fs::exists(sharedDir / "shared"))
+        sharedDir = sharedDir / "shared";
+    else {
+        sharedDir = sharedDir / ("shared-api" + std::to_string(PLUGIN_API_VER));
+        if (!fs::exists(sharedDir)) throw std::runtime_error("Shared directory not found");
+    }
+    auto device_manager_dir = sharedDir / "XDAQ-Neuropixels" / "device_managers";
+    Neuropixels::scanBS(device_manager_dir.generic_string().c_str());
+#endif
     Neuropixels::basestationID list[16];
     int count = getDeviceList (&list[0], 16);
 
