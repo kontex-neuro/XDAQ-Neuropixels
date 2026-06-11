@@ -184,7 +184,6 @@ void Initializer::run()
                     else
                     {
                         LOGC ("  Could not open OneBox");
-                        setStatusMessage ("Could not open OneBox");
                         delete bs;
                     }
                 }
@@ -591,6 +590,11 @@ void NeuropixThread::applyProbeSettingsQueue()
             settings.probe->setApFilterState();
 
             settings.probe->calibrate();
+
+            if (settings.probe->ui != nullptr)
+            {
+                settings.probe->ui->updateCalibrationStatusIndicator();
+            }
 
             settings.probe->writeConfiguration();
 
@@ -1110,8 +1114,8 @@ void NeuropixThread::updateSettings (OwnedArray<ContinuousChannel>* continuousCh
 
             DataStream::Settings settings {
                 streamName,
-                "description",
-                "identifier",
+                description,
+                identifier,
 
                 info.sample_rate,
                 true

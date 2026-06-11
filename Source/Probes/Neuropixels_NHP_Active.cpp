@@ -198,12 +198,36 @@ void Neuropixels_NHP_Active::calibrate()
     if (! probeDirectory.exists())
     {
         LOGD ("!!! Calibration files not found for probe serial number: ", info.serial_number);
+        isCalibrated = false;
         return;
     }
 
-    String adcFile = probeDirectory.getChildFile (info.serial_number + "_ADCCalibration.csv").getFullPathName();
-    String gainFile = probeDirectory.getChildFile (info.serial_number + "_gainCalValues.csv").getFullPathName();
-    LOGDD ("ADC file: ", adcFile);
+    if (! probeDirectory.hasReadAccess())
+    {
+        LOGE ("No read access to calibration directory: ", probeDirectory.getFullPathName());
+        isCalibrated = false;
+        return;
+    }
+
+    auto adcPath = probeDirectory.getChildFile (String (info.serial_number) + "_ADCCalibration.csv");
+    if (! adcPath.existsAsFile())
+    {
+        LOGE ("ADC calibration file not found for probe serial number: ", info.serial_number);
+        isCalibrated = false;
+        return;
+    }
+
+    auto gainPath = probeDirectory.getChildFile (String (info.serial_number) + "_gainCalValues.csv");
+    if (! gainPath.existsAsFile())
+    {
+        LOGE ("Gain calibration file not found for probe serial number: ", info.serial_number);
+        isCalibrated = false;
+        return;
+    }
+
+    String adcFile = adcPath.getFullPathName();
+    String gainFile = gainPath.getFullPathName();
+    LOGD ("ADC file: ", adcFile);
 
     errorCode = Neuropixels::setADCCalibration (basestation->slot, headstage->port, adcFile.toRawUTF8());
 
@@ -217,7 +241,7 @@ void Neuropixels_NHP_Active::calibrate()
         return;
     }
 
-    LOGDD ("Gain file: ", gainFile);
+    LOGD ("Gain file: ", gainFile);
 
     errorCode = Neuropixels::setGainCalibration (basestation->slot, headstage->port, dock, gainFile.toRawUTF8());
 
@@ -587,8 +611,6 @@ void Neuropixels_NHP_Active::run()
 
 bool Neuropixels_NHP_Active::runBist (BIST bistType)
 {
-    close();
-    open();
 
     int slot = basestation->slot;
     int port = headstage->port;
@@ -660,12 +682,13 @@ bool Neuropixels_NHP_Active::runBist (BIST bistType)
             CoreServices::sendStatusMessage ("Test not found.");
     }
 
-    close();
-    open();
+    // Re-initialize probe after running
     initialize (false);
-
-    errorCode = Neuropixels::setSWTrigger (slot);
-    errorCode = Neuropixels::arm (slot);
+    setAllGains();
+    setAllReferences();
+    setApFilterState();
+    selectElectrodes();
+    writeConfiguration();
 
     return returnValue;
 }
