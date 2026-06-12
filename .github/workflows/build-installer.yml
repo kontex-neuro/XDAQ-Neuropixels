@@ -1,0 +1,65 @@
+name: Build XDAQ-Neuropixels Windows installer
+
+on:
+    workflow_dispatch:
+
+jobs:
+    build-installer:
+        runs-on: windows-2022
+
+        steps:
+            - name: Install build system
+              run: pipx install conan ninja
+
+            - name: Setup Compiler
+              uses: ilammy/msvc-dev-cmd@138b1c783b65ec697d8342918306b7b2db4e88f1
+
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: conan cache
+              id: conan_cache
+              uses: actions/cache@v5
+              with:
+                  path: ~/.conan2
+                  key: conan-windows-2022-x64
+
+            - name: Clone submodules and setup Conan
+              run: |
+                  conan config install .github/conan_profiles/windows-2022-x64 -tf profiles
+                  git submodule update --init --recursive
+                  git clone https://github.com/kontex-neuro/kontex-conan.git kontex-conan
+                  conan remote add --force kontex-neuro ./kontex-conan
+
+            - name: Configure plugin-GUI
+              run: |
+                  cmake -G"Ninja Multi-Config" -S plugin-GUI -B plugin-GUI/Build
+
+            - name: Get plugin-GUI commit hash
+              id: plugin_gui_hash
+              shell: bash
+              run: echo "commit=$(git -C plugin-GUI rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+            - name: open-ephys.lib cache
+              id: open-ephys_lib_cache
+              uses: actions/cache@v5
+              with:
+                  path: plugin-GUI/Build/Release/open-ephys.lib
+                  key: open-ephys-lib-windows-2022-x64-${{ steps.plugin_gui_hash.outputs.commit }}
+
+            - name: Build plugin-GUI
+              if: steps.open-ephys_lib_cache.outputs.cache-hit != 'true'
+              run: |
+                  cmake --build plugin-GUI/Build --config Release --target open-ephys
+
+            - name: Build XDAQ-Neuropixels installer
+              run: |
+                  conan install . --build=missing --profile:all windows-2022-x64 -s build_type=Release
+                  cmake -S . -B build/Release --preset conan-release -DGUI_BASE_DIR=plugin-GUI -DXDAQ_NP_BUILD_INSTALLER=ON
+                  cmake --build build/Release --preset conan-release --config Release --target package
+
+            - name: Upload installer
+              uses: actions/upload-artifact@v7
+              with:
+                  name: windows-installer
+                  path: build/Release/XDAQ-Neuropixels-*-windows-x64-installer.exe

@@ -12,6 +12,8 @@ get_filename_component(GUI_BASE_DIR ${GUI_BASE_DIR} ABSOLUTE)
 set(PLUGIN_NAME XDAQ-Neuropixels)
 project(${PLUGIN_NAME} VERSION 0.5.0 LANGUAGES CXX)
 
+option(XDAQ_NP_BUILD_INSTALLER "Configure a CPack/NSIS Windows installer" OFF)
+
 set(GUI_COMMONLIB_DIR ${GUI_BASE_DIR}/installed_libs)
 
 set(CONFIGURATION_FOLDER $<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>$<$<CONFIG:Release>:Release> )
@@ -77,6 +79,14 @@ endif()
 set(PLUGIN_INSTALL_DIR plugins CACHE STRING "Plugin installation directory")
 set(SHARED_INSTALL_DIR shared CACHE STRING "Shared installation directory")
 
+# When packaging the standalone installer, CMAKE_INSTALL_PREFIX is set explicitly
+# (so the default-prefix block below is skipped). Force the api10 layout here so the
+# packaged tree matches what the Open Ephys GUI expects.
+if(XDAQ_NP_BUILD_INSTALLER)
+	set(PLUGIN_INSTALL_DIR plugins-api10 CACHE STRING "Plugin installation directory" FORCE)
+	set(SHARED_INSTALL_DIR shared-api10 CACHE STRING "Shared installation directory" FORCE)
+endif()
+
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		set_property(CACHE CMAKE_INSTALL_PREFIX PROPERTY VALUE C:/ProgramData/Open\ Ephys)
@@ -124,5 +134,43 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		SHARED_DEST  ${SHARED_INSTALL_DIR}
 		MANAGERS_DEST ${SHARED_INSTALL_DIR}/${PLUGIN_NAME}/device_managers
 	)
+endif()
+
+
+# ----------------------------------------------------------------------------
+# Standalone Windows installer (CPack + NSIS)
+#
+# Produces a self-contained installer .exe for customers who cannot install the
+# plugin through the Open Ephys GUI plugin installer. It drops the plugin and its
+# runtime into the per-user Open Ephys data directory:
+#     %LOCALAPPDATA%\Open Ephys\plugins-api10
+#     %LOCALAPPDATA%\Open Ephys\shared-api10
+#
+# Requires NSIS (https://nsis.sourceforge.io) on the build machine.
+#
+# Build it (after configuring with -DXDAQ_NP_BUILD_INSTALLER=ON):
+#     cmake --build build/Release --config Release --target package
+# ----------------------------------------------------------------------------
+if(XDAQ_NP_BUILD_INSTALLER AND ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	set(CPACK_GENERATOR "NSIS")
+	set(CPACK_PACKAGE_NAME "XDAQ-Neuropixels")
+	set(CPACK_PACKAGE_VENDOR "KonteX Neuroscience")
+	set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+	set(CPACK_PACKAGE_FILE_NAME "XDAQ-Neuropixels-${PROJECT_VERSION}-windows-x64-installer")
+	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "XDAQ-Neuropixels plugin for the Open Ephys GUI")
+
+	# Install under %LOCALAPPDATA%\Open Ephys (the per-user Open Ephys data dir).
+	# Full target path = ${CPACK_NSIS_INSTALL_ROOT}\${CPACK_PACKAGE_INSTALL_DIRECTORY}.
+	set(CPACK_NSIS_INSTALL_ROOT "$LOCALAPPDATA")
+	set(CPACK_PACKAGE_INSTALL_DIRECTORY "Open Ephys")
+
+	set(CPACK_NSIS_DISPLAY_NAME "XDAQ-Neuropixels Plugin")
+	set(CPACK_NSIS_PACKAGE_NAME "XDAQ-Neuropixels Plugin ${PROJECT_VERSION}")
+	# Remove a previously installed version before installing the new one.
+	set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+	# This is a drop-in for an existing data dir; don't offer to modify PATH.
+	set(CPACK_NSIS_MODIFY_PATH OFF)
+
+	include(CPack)
 endif()
 
