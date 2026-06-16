@@ -148,12 +148,13 @@ if(XDAQ_NP_BUILD_INSTALLER)
 		set(CPACK_NSIS_INSTALL_ROOT "$LOCALAPPDATA")
 		set(CPACK_PACKAGE_INSTALL_DIRECTORY "Open Ephys")
 		set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-		# Double backslashes survive the CPackConfig.cmake round-trip and emit a single
-		# backslash into the generated .nsi script.
+		# This value is written verbatim into CPackConfig.cmake as set(... "<value>")
+		# and re-read by cpack, so embedded quotes and backslashes must be escaped to
+		# survive that round-trip: \" -> " and \\ -> \ in the generated .nsi script.
 		set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS [[
   SetShellVarContext current
-  StrCpy $INSTDIR "$LOCALAPPDATA\\Open Ephys"
-  SetOutPath "$INSTDIR"
+  StrCpy $INSTDIR \"$LOCALAPPDATA\\Open Ephys\"
+  SetOutPath \"$INSTDIR\"
 ]])
 	endif()
 
