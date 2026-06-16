@@ -126,3 +126,24 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	)
 endif()
 
+# Optional redistributable installer (CPack)
+option(XDAQ_NP_BUILD_INSTALLER "Build a redistributable installer package" OFF)
+
+if(XDAQ_NP_BUILD_INSTALLER)
+	set(CPACK_PACKAGE_NAME "${PLUGIN_NAME}")
+	set(CPACK_PACKAGE_VENDOR "KonteX Neuroscience")
+	set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+	set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "XDAQ-Neuropixels plugin for the Open Ephys GUI")
+
+	if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+		set(CPACK_GENERATOR "NSIS")
+		set(CPACK_PACKAGE_FILE_NAME "${PLUGIN_NAME}-${PROJECT_VERSION}-windows-x64-installer")
+		# Install into the per-user LocalAppData where the Open Ephys GUI loads plugins
+		set(CPACK_NSIS_INSTALL_ROOT "$LOCALAPPDATA")
+		set(CPACK_PACKAGE_INSTALL_DIRECTORY "Open Ephys")
+		set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+	endif()
+
+	include(CPack)
+endif()
+
