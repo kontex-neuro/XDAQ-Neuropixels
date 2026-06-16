@@ -138,10 +138,18 @@ if(XDAQ_NP_BUILD_INSTALLER)
 	if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		set(CPACK_GENERATOR "NSIS")
 		set(CPACK_PACKAGE_FILE_NAME "${PLUGIN_NAME}-${PROJECT_VERSION}-windows-x64-installer")
-		# Install into the per-user LocalAppData where the Open Ephys GUI loads plugins
+		# Install into the per-user LocalAppData where the Open Ephys GUI loads plugins.
+		# NSIS elevates to admin and switches to the "all users" shell context, which makes
+		# $LOCALAPPDATA resolve to C:\ProgramData. Force the current-user context and redirect
+		# the install dir so files land in C:\Users\<user>\AppData\Local\Open Ephys.
 		set(CPACK_NSIS_INSTALL_ROOT "$LOCALAPPDATA")
 		set(CPACK_PACKAGE_INSTALL_DIRECTORY "Open Ephys")
 		set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+		set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS [[
+  SetShellVarContext current
+  StrCpy $INSTDIR "$LOCALAPPDATA\Open Ephys"
+  SetOutPath "$INSTDIR"
+]])
 	endif()
 
 	include(CPack)
