@@ -662,27 +662,16 @@ public:
         return isEnabledForSurvey;
     }
 
+    bool isSurveyModeActive() const
+    {
+        return surveyModeActive;
+    }
+
 protected:
     std::unique_ptr<ActivityView> apView;
     std::unique_ptr<ActivityView> lfpView;
 
-    void refreshActivityViewMapping()
-    {
-        if (settings.selectedElectrode.size() != channel_count)
-            return;
-
-        std::vector<int> mapping;
-        mapping.reserve ((size_t) channel_count);
-
-        for (int i = 0; i < channel_count; ++i)
-            mapping.push_back (settings.selectedElectrode[i]);
-
-        if (apView)
-            apView->setChannelToElectrodeMapping (mapping);
-
-        if (lfpView)
-            lfpView->setChannelToElectrodeMapping (mapping);
-    }
+    void refreshActivityViewMapping();
 
     uint64 eventCode;
     Array<int> gains; // available gain values

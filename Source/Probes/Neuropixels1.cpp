@@ -187,11 +187,35 @@ void Neuropixels1::calibrate()
     if (! probeDirectory.exists())
     {
         LOGD ("!!! Calibration files not found for probe serial number: ", info.serial_number);
+        isCalibrated = false;
         return;
     }
 
-    String adcFile = probeDirectory.getChildFile (String (info.serial_number) + "_ADCCalibration.csv").getFullPathName();
-    String gainFile = probeDirectory.getChildFile (String (info.serial_number) + "_gainCalValues.csv").getFullPathName();
+    if (! probeDirectory.hasReadAccess())
+    {
+        LOGE ("No read access to calibration directory: ", probeDirectory.getFullPathName());
+        isCalibrated = false;
+        return;
+    }
+
+    auto adcPath = probeDirectory.getChildFile (String (info.serial_number) + "_ADCCalibration.csv");
+    if (! adcPath.existsAsFile())
+    {
+        LOGE ("ADC calibration file not found for probe serial number: ", info.serial_number);
+        isCalibrated = false;
+        return;
+    }
+
+    auto gainPath = probeDirectory.getChildFile (String (info.serial_number) + "_gainCalValues.csv");
+    if (! gainPath.existsAsFile())
+    {
+        LOGE ("Gain calibration file not found for probe serial number: ", info.serial_number);
+        isCalibrated = false;
+        return;
+    }
+
+    String adcFile = adcPath.getFullPathName();
+    String gainFile = gainPath.getFullPathName();
     LOGDD ("ADC file: ", adcFile);
 
     errorCode = Neuropixels::setADCCalibration (basestation->slot, headstage->port, adcFile.toRawUTF8());
@@ -203,6 +227,7 @@ void Neuropixels1::calibrate()
     else
     {
         LOGD ("!!! Unsuccessful ADC calibration, failed with error code: ", errorCode);
+        isCalibrated = false;
         return;
     }
 
@@ -217,6 +242,7 @@ void Neuropixels1::calibrate()
     else
     {
         LOGD ("!!! Unsuccessful gain calibration, failed with error code: ", errorCode);
+        isCalibrated = false;
         return;
     }
 
@@ -401,6 +427,7 @@ void Neuropixels1::stopAcquisition()
 void Neuropixels1::run()
 {
     double timestamp_s[MAXPACKETS];
+    double ap_timestamp_s[12 * MAXPACKETS];
     uint64_t last_npx_timestamp = 0;
     while (! threadShouldExit())
     {
@@ -446,6 +473,8 @@ void Neuropixels1::run()
 
                     last_npx_timestamp = npx_timestamp;
 
+                    ap_timestamp_s[i + packetNum * 12] = npx_timestamp / 1e6;
+
                     for (int j = 0; j < 384; j++)
                     {
                         apSamples[j * (12 * count) + i + (packetNum * 12)] =
@@ -481,7 +510,7 @@ void Neuropixels1::run()
                     lfpSamples[(384 * count) + packetNum] = (float) eventCode;
             }
 
-            apBuffer->addToBuffer (apSamples, ap_timestamps, timestamp_s, event_codes, 12 * count);
+            apBuffer->addToBuffer (apSamples, ap_timestamps, ap_timestamp_s, event_codes, 12 * count);
             apView->addToBuffer (apSamples, 12 * count);
             lfpBuffer->addToBuffer (lfpSamples, lfp_timestamps, timestamp_s, lfp_event_codes, count);
             lfpView->addToBuffer (lfpSamples, count);
@@ -526,8 +555,6 @@ void Neuropixels1::run()
 
 bool Neuropixels1::runBist (BIST bistType)
 {
-    close();
-    open();
 
     int slot = basestation->slot;
     int port = headstage->port;
@@ -599,12 +626,13 @@ bool Neuropixels1::runBist (BIST bistType)
             CoreServices::sendStatusMessage ("Test not found.");
     }
 
-    close();
-    open();
+    // Re-initialize probe after running
     initialize (false);
-
-    errorCode = Neuropixels::setSWTrigger (slot);
-    errorCode = Neuropixels::arm (slot);
+    setAllGains();
+    setAllReferences();
+    setApFilterState();
+    selectElectrodes();
+    writeConfiguration();
 
     return returnValue;
 }

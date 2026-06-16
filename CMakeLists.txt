@@ -10,7 +10,9 @@ endif()
 get_filename_component(GUI_BASE_DIR ${GUI_BASE_DIR} ABSOLUTE)
 
 set(PLUGIN_NAME XDAQ-Neuropixels)
-project(${PLUGIN_NAME} VERSION 0.4.1 LANGUAGES CXX)
+project(${PLUGIN_NAME} VERSION 0.5.0 LANGUAGES CXX)
+
+option(XDAQ_NP_BUILD_INSTALLER "Configure a CPack/NSIS Windows installer" OFF)
 
 set(GUI_COMMONLIB_DIR ${GUI_BASE_DIR}/installed_libs)
 
@@ -76,6 +78,14 @@ endif()
 # Install plugin target
 set(PLUGIN_INSTALL_DIR plugins CACHE STRING "Plugin installation directory")
 set(SHARED_INSTALL_DIR shared CACHE STRING "Shared installation directory")
+
+# When packaging the standalone installer, CMAKE_INSTALL_PREFIX is set explicitly
+# (so the default-prefix block below is skipped). Force the api10 layout here so the
+# packaged tree matches what the Open Ephys GUI expects.
+if(XDAQ_NP_BUILD_INSTALLER)
+	set(PLUGIN_INSTALL_DIR plugins-api10 CACHE STRING "Plugin installation directory" FORCE)
+	set(SHARED_INSTALL_DIR shared-api10 CACHE STRING "Shared installation directory" FORCE)
+endif()
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
