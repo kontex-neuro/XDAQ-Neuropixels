@@ -79,7 +79,10 @@ set(SHARED_INSTALL_DIR shared CACHE STRING "Shared installation directory")
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-		set_property(CACHE CMAKE_INSTALL_PREFIX PROPERTY VALUE $ENV{LOCALAPPDATA}/Open\ Ephys)
+		# Normalize backslashes from %LOCALAPPDATA% to forward slashes so the path is a
+		# valid CMake/CPack string (avoids "Invalid escape sequence" warnings).
+		file(TO_CMAKE_PATH "$ENV{LOCALAPPDATA}/Open Ephys" XDAQ_NP_WIN_INSTALL_PREFIX)
+		set_property(CACHE CMAKE_INSTALL_PREFIX PROPERTY VALUE "${XDAQ_NP_WIN_INSTALL_PREFIX}")
 		set(PLUGIN_INSTALL_DIR plugins-api10 CACHE STRING "Plugin installation directory" FORCE)
 		set(SHARED_INSTALL_DIR shared-api10 CACHE STRING "Shared installation directory" FORCE)
 	elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
@@ -145,9 +148,11 @@ if(XDAQ_NP_BUILD_INSTALLER)
 		set(CPACK_NSIS_INSTALL_ROOT "$LOCALAPPDATA")
 		set(CPACK_PACKAGE_INSTALL_DIRECTORY "Open Ephys")
 		set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+		# Double backslashes survive the CPackConfig.cmake round-trip and emit a single
+		# backslash into the generated .nsi script.
 		set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS [[
   SetShellVarContext current
-  StrCpy $INSTDIR "$LOCALAPPDATA\Open Ephys"
+  StrCpy $INSTDIR "$LOCALAPPDATA\\Open Ephys"
   SetOutPath "$INSTDIR"
 ]])
 	endif()
