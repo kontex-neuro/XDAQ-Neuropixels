@@ -79,7 +79,7 @@ set(SHARED_INSTALL_DIR shared CACHE STRING "Shared installation directory")
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-		set_property(CACHE CMAKE_INSTALL_PREFIX PROPERTY VALUE C:/ProgramData/Open\ Ephys)
+		set_property(CACHE CMAKE_INSTALL_PREFIX PROPERTY VALUE $ENV{LOCALAPPDATA}/Open\ Ephys)
 		set(PLUGIN_INSTALL_DIR plugins-api10 CACHE STRING "Plugin installation directory" FORCE)
 		set(SHARED_INSTALL_DIR shared-api10 CACHE STRING "Shared installation directory" FORCE)
 	elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
