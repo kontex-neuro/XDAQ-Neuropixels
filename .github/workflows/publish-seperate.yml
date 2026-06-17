@@ -109,9 +109,9 @@ jobs:
               with:
                   name: mac-universal
                   path: dist/mac-universal.zip
-
+    
     publish:
-        runs-on: ubuntu-24.04
+        runs-on: windows-2022 
         needs: [merge_macos]
 
         steps:
@@ -172,9 +172,132 @@ jobs:
                         echo "Missing dist/mac-universal"
                         exit 1
                   fi
+
+                  if [[ "$ref" != xdaq-v* ]]; then
+                      echo "Not a release tag: $ref, skipping upload"
+                      exit 0
+                  fi
+                  
+                  if [[ -z "${{ secrets.ARTIFACTORY_ACCESS_TOKEN  }}" ]]; then
+                      echo "No Artifactory API key set, skipping upload"
+                      exit 0
+                  fi
+
+                  curl -H "X-JFrog-Art-Api:${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}" -T "dist/$win_new_name" \
+
+            - name: Upload dist folder
+              uses: actions/upload-artifact@v7
+              with:
+                  name: dist
+                  path: dist
+    publish:
+        runs-on: macos-15
+        needs: [merge_macos]
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Extract API Version
+              run: |
+                  set -e
+                  git submodule update --init
+                  echo PLUGIN_API=$(grep plugin-GUI/Source/Processors/PluginManager/OpenEphysPlugin.h \
+                    -e '#define PLUGIN_API_VER' | \
+                    sed -E 's/^#define[[:space:]]+PLUGIN_API_VER[[:space:]]+([0-9]+)/\1/') >> $GITHUB_ENV
+
+            - name: Download all artifacts
+              uses: actions/download-artifact@v8
+              with:
+                  path: dist
+
+            - name: Flatten dist folder
+              run: |
+                  find dist -name '*.zip' -exec mv {} dist/ \;
+                  find dist -mindepth 1 -type d -exec rm -rf {} +
+                  ls -la dist
+
+            - name: Upload to Artifactory
+              run: |
+                  set -e
+
+                  # Ensure this is a tag in the form xdaq-v*
+                  ref="${{ github.ref_name }}"
+                  if [[ "$ref" != xdaq-v* ]]; then
+                      echo "Not a release tag: $ref"
+                      ref="xdaq-v0.0.0"  # Default to a dummy version if not a valid tag
+                  fi
+
+                  upload_tag="${ref#xdaq-v}"
+                  api_ver="$PLUGIN_API"
+
+                  if [[ -z dist/mac-universal ]]; then
+                        echo "Missing dist/mac-universal"
+                        exit 1
+                  fi
                   mac_new_name="XDAQ-Neuropixels-mac_${upload_tag}-API${api_ver}.zip"
                   mv dist/mac-universal.zip dist/$mac_new_name
                   echo "Created: dist/$mac_new_name"
+
+                  if [[ "$ref" != xdaq-v* ]]; then
+                      echo "Not a release tag: $ref, skipping upload"
+                      exit 0
+                  fi
+                  
+                  if [[ -z "${{ secrets.ARTIFACTORY_ACCESS_TOKEN  }}" ]]; then
+                      echo "No Artifactory API key set, skipping upload"
+                      exit 0
+                  fi
+
+                  curl -H "X-JFrog-Art-Api:${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}" -T "dist/$mac_new_name" \
+                    "https://openephys.jfrog.io/artifactory/XDAQ-Neuropixels-plugin/mac/$mac_new_name"
+
+            - name: Upload dist folder
+              uses: actions/upload-artifact@v7
+              with:
+                  name: dist
+                  path: dist
+
+    publish:
+        runs-on: ubuntu-24.04
+        needs: [merge_macos]
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Extract API Version
+              run: |
+                  set -e
+                  git submodule update --init
+                  echo PLUGIN_API=$(grep plugin-GUI/Source/Processors/PluginManager/OpenEphysPlugin.h \
+                    -e '#define PLUGIN_API_VER' | \
+                    sed -E 's/^#define[[:space:]]+PLUGIN_API_VER[[:space:]]+([0-9]+)/\1/') >> $GITHUB_ENV
+
+            - name: Download all artifacts
+              uses: actions/download-artifact@v8
+              with:
+                  path: dist
+
+            - name: Flatten dist folder
+              run: |
+                  find dist -name '*.zip' -exec mv {} dist/ \;
+                  find dist -mindepth 1 -type d -exec rm -rf {} +
+                  ls -la dist
+
+            - name: Upload to Artifactory
+              run: |
+                  set -e
+
+                  # Ensure this is a tag in the form xdaq-v*
+                  ref="${{ github.ref_name }}"
+                  if [[ "$ref" != xdaq-v* ]]; then
+                      echo "Not a release tag: $ref"
+                      ref="xdaq-v0.0.0"  # Default to a dummy version if not a valid tag
+                  fi
+
+                  upload_tag="${ref#xdaq-v}"
+                  api_ver="$PLUGIN_API"
 
                   if [[ -z dist/linux-x86_64 ]]; then
                           echo "Missing dist/linux-x86_64"
@@ -194,10 +317,6 @@ jobs:
                       exit 0
                   fi
 
-                  curl -H "X-JFrog-Art-Api:${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}" -T "dist/$win_new_name" \
-                    "https://openephys.jfrog.io/artifactory/XDAQ-Neuropixels-plugin/windows/$win_new_name"
-                  curl -H "X-JFrog-Art-Api:${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}" -T "dist/$mac_new_name" \
-                    "https://openephys.jfrog.io/artifactory/XDAQ-Neuropixels-plugin/mac/$mac_new_name"
                   curl -H "X-JFrog-Art-Api:${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}" -T "dist/$linux_new_name" \
                     "https://openephys.jfrog.io/artifactory/XDAQ-Neuropixels-plugin/linux/$linux_new_name"
 
