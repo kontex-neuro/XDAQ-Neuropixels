@@ -91,7 +91,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		# Normalize backslashes from %LOCALAPPDATA% to forward slashes so the path is a
 		# valid CMake/CPack string (avoids "Invalid escape sequence" warnings).
-		file(TO_CMAKE_PATH "$ENV{LOCALAPPDATA}/Open Ephys" XDAQ_NP_WIN_INSTALL_PREFIX)
+		#file(TO_CMAKE_PATH "$ENV{LOCALAPPDATA}/Open Ephys" XDAQ_NP_WIN_INSTALL_PREFIX)
 		set_property(CACHE CMAKE_INSTALL_PREFIX PROPERTY VALUE "${XDAQ_NP_WIN_INSTALL_PREFIX}")
 		set(PLUGIN_INSTALL_DIR plugins-api10 CACHE STRING "Plugin installation directory" FORCE)
 		set(SHARED_INSTALL_DIR shared-api10 CACHE STRING "Shared installation directory" FORCE)
@@ -140,7 +140,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif()
 
 # Optional redistributable installer (CPack)
-option(XDAQ_NP_BUILD_INSTALLER "Build a redistributable installer package" OFF)
+# option(XDAQ_NP_BUILD_INSTALLER "Build a redistributable installer package" OFF)
 
 if(XDAQ_NP_BUILD_INSTALLER)
 	set(CPACK_PACKAGE_NAME "${PLUGIN_NAME}")
