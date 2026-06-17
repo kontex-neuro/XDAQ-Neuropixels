@@ -1,4 +1,4 @@
-name: Publish XDAQ-Neuropixels
+name: Publish XDAQ-Neuropixels Seperately
 
 on:
     workflow_dispatch:
