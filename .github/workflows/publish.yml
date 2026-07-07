@@ -116,7 +116,7 @@ jobs:
                   path: dist/mac-universal.zip
 
     publish_windows:
-        runs-on: windows-2022
+        runs-on: ubuntu-24.04
         needs: build
         defaults:
             run:
@@ -164,16 +164,24 @@ jobs:
                   echo "WIN_ZIP=$win_new_name" >> $GITHUB_ENV
 
             - name: Repack windows zip
-              shell: pwsh
               run: |
-                  $ErrorActionPreference = 'Stop'
+                  set -e
 
-                  # FIXME: remove hack
-                  # repack windows zip so plugins/XDAQ-Neuropixels.dll is the first entry instead of plugins/
-                  Expand-Archive -Path "dist/$env:WIN_ZIP" -DestinationPath 'dist/windows-repack' -Force
-                  Remove-Item "dist/$env:WIN_ZIP"
-                  Compress-Archive -Path 'dist/windows-repack/*' -DestinationPath "dist/$env:WIN_ZIP" -Force
-                  Remove-Item 'dist/windows-repack' -Recurse -Force
+                  # FIXME: remove hacks below once open-ephys/plugin-GUI#678 is fixed.
+                  # The plugin installer reads the dll name from zip entry 0 (Windows), but fails to strip
+                  # the "plugins/" prefix because it searches for a backslash while zip entries use "/".
+                  # Workarounds: keep plugins/XDAQ-Neuropixels.dll as the first real entry, and prepend a
+                  # zero-byte "XDAQ-Neuropixels.dll" dummy entry whose prefix-less name the installer reads as-is.
+                  7za x "dist/$WIN_ZIP" -odist/windows-repack
+                  rm "dist/$WIN_ZIP"
+                  cd dist/windows-repack
+                  touch XDAQ-Neuropixels.dll  # zero-byte dummy; the real dll lives in plugins/
+                  7za a "../$WIN_ZIP" XDAQ-Neuropixels.dll
+                  rm XDAQ-Neuropixels.dll
+                  7za a "../$WIN_ZIP" plugins shared
+                  cd ../..
+                  rm -rf dist/windows-repack
+                  echo "Created: dist/$WIN_ZIP"
 
             - name: Upload to Artifactory
               env:
@@ -181,9 +189,8 @@ jobs:
               run: |
                   set -e
 
-                  ref="${{ github.ref_name }}"
-                  if [[ "$ref" != xdaq-v* ]]; then
-                      echo "Not a release tag: $ref, skipping upload"
+                  if [[ "${{ github.ref }}" != refs/tags/xdaq-v* ]]; then
+                      echo "Not a release tag, skipping upload"
                       exit 0
                   fi
 
@@ -250,8 +257,8 @@ jobs:
                   mv dist/mac-universal.zip "dist/$mac_new_name"
                   echo "Created: dist/$mac_new_name"
 
-                  if [[ "$ref" != xdaq-v* ]]; then
-                      echo "Not a release tag: $ref, skipping upload"
+                  if [[ "${{ github.ref }}" != refs/tags/xdaq-v* ]]; then
+                      echo "Not a release tag, skipping upload"
                       exit 0
                   fi
 
@@ -318,8 +325,8 @@ jobs:
                   mv dist/linux-x86_64.zip "dist/$linux_new_name"
                   echo "Created: dist/$linux_new_name"
 
-                  if [[ "$ref" != xdaq-v* ]]; then
-                      echo "Not a release tag: $ref, skipping upload"
+                  if [[ "${{ github.ref }}" != refs/tags/xdaq-v* ]]; then
+                      echo "Not a release tag, skipping upload"
                       exit 0
                   fi
 
