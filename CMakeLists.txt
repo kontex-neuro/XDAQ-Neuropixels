@@ -65,6 +65,13 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_link_libraries(${PLUGIN_NAME} PRIVATE
 		${GUI_BASE_DIR}/Build/${CONFIGURATION_FOLDER}/open-ephys.lib
 	)
+
+	# Delay-load xdaq_npapi.dll (see DELAY_LOAD_RELATIVE_DIR below, set once
+	# SHARED_INSTALL_DIR/PLUGIN_INSTALL_DIR reach their final values) instead of
+	# relying on the Open Ephys host's DLL search path. See Source/DelayLoadHook.cpp.
+	target_compile_definitions(${PLUGIN_NAME} PRIVATE "DELAY_LOAD_DLL_NAME=\"xdaq_npapi.dll\"")
+	target_link_options(${PLUGIN_NAME} PRIVATE "/DELAYLOAD:xdaq_npapi.dll")
+	target_link_libraries(${PLUGIN_NAME} PRIVATE delayimp.lib)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	target_link_libraries(${PLUGIN_NAME} PRIVATE
 		GL X11 Xext Xinerama asound dl freetype pthread rt
@@ -110,6 +117,13 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	endif()
 endif()
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	# Resolve xdaq_npapi.dll from shared/<PLUGIN_NAME>/
+	target_compile_definitions(${PLUGIN_NAME} PRIVATE
+		"DELAY_LOAD_RELATIVE_DIR=L\"../${SHARED_INSTALL_DIR}/${PLUGIN_NAME}\""
+	)
+endif()
+
 install(TARGETS ${PLUGIN_NAME}
 	LIBRARY DESTINATION ${PLUGIN_INSTALL_DIR}
 	RUNTIME DESTINATION ${PLUGIN_INSTALL_DIR}
@@ -137,8 +151,8 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	libxdaqnp_install_runtime(
-		PLUGIN_DEST  ${SHARED_INSTALL_DIR}
-		SHARED_DEST  ${SHARED_INSTALL_DIR}
+		PLUGIN_DEST  ${SHARED_INSTALL_DIR}/${PLUGIN_NAME}
+		SHARED_DEST  ${SHARED_INSTALL_DIR}/${PLUGIN_NAME}
 		MANAGERS_DEST ${SHARED_INSTALL_DIR}/${PLUGIN_NAME}/device_managers
 	)
 endif()
