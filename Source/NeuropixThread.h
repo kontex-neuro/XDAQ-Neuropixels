@@ -62,7 +62,7 @@ struct StreamInfo
     int shank = -1;
     bool sendSyncAsContinuousChannel;
     Probe* probe;
-    OneBoxADC* adc;
+    DataSource* adc;
 };
 
 /** 

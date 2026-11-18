@@ -32,7 +32,7 @@ struct XDAQADC : public DataSource
     constexpr static int XDAQ_NUM_ADCS = 8;
     constexpr static int XDAQ_MAXPACKETS = 64;
 
-    XDAQADC (Basestation* bs) : DataSource (bs), bitVolts (10.0f / 32768.0f)
+    XDAQADC (Basestation* bs) : DataSource (bs), bitVolts (10.24f / 32768.0f) // +/-10.24 V, offset binary converted to int16 by npapi
     {
         channel_count = XDAQ_NUM_ADCS;
         sample_rate = 30003.000300030002;
@@ -61,7 +61,7 @@ struct XDAQADC : public DataSource
         stopThread(1000);
     }
 
-    float getChannelGain (int channel)
+    float getChannelGain (int channel) override
     {
         if (channel < 0 || channel >= channel_count)
             return -1;
@@ -101,6 +101,7 @@ struct XDAQADC : public DataSource
                     }
 
                     sample_numbers[packetNum] = sample_number++;
+                    timestamps[packetNum] = packetInfo[packetNum].Timestamp / 1e6; // 1 MHz device clock, as for the probe streams
                     event_codes[packetNum] = eventCode;
                 }
 

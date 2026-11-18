@@ -536,7 +536,7 @@ void NeuropixThread::updateStreamInfo (bool enabledStateChanged)
                 adcInfo.type = ADC;
                 adcInfo.sendSyncAsContinuousChannel = false;
                 adcInfo.probe = nullptr;
-                adcInfo.adc = (OneBoxADC*) source;
+                adcInfo.adc = source;
 
                 sourceBuffers.add (new DataBuffer (adcInfo.num_channels, 10000)); // data buffer
                 source->apBuffer = sourceBuffers.getLast();
@@ -1056,6 +1056,7 @@ void NeuropixThread::updateSettings (OwnedArray<ContinuousChannel>* continuousCh
     if (sourceStreams.size() == 0) // initialize data streams
     {
         String lastName;
+        int adcStreamCount = 0;
 
         for (auto info : streamInfo)
         {
@@ -1063,7 +1064,11 @@ void NeuropixThread::updateSettings (OwnedArray<ContinuousChannel>* continuousCh
 
             if (info.type == stream_type::ADC)
             {
+                // Each stream needs its own name: the Record Node names folders after it,
+                // so two "XDAQ-ADC" streams would be written into the same files.
                 streamName = "XDAQ-ADC";
+                if (++adcStreamCount > 1)
+                    streamName += "-" + String (adcStreamCount);
                 description = "XDAQ ADC data stream";
                 identifier = "xdaq.adc";
             }

@@ -401,6 +401,9 @@ public:
     /** Returns the name of the data source */
     virtual String getName() = 0;
 
+    /** Returns the volts per bit of an ADC channel (-1 if the channel is invalid) */
+    virtual float getChannelGain (int channel) { return -1.0f; }
+
     // --------- GET / SET METHODS  --------- //
 
     /** Sets the status (CONNECTING, CONNECTED, etc.) */

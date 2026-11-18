@@ -86,7 +86,7 @@ public:
     AdcInputRange getAdcInputRange();
 
     /** Returns gain of a particular channel (depends on ADC input range) */
-    float getChannelGain (int channel);
+    float getChannelGain (int channel) override;
 
     /** Sets threshold for ADC channel */
     void setAdcThresholdLevel (AdcThresholdLevel level, int channel);
